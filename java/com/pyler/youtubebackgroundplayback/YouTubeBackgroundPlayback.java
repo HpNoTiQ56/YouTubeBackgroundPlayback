@@ -5,16 +5,17 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,11 +24,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedHelpers;
+import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.robv.android.xposed.XC_MethodReplacement.returnConstant;
 import static de.robv.android.xposed.XposedHelpers.callMethod;
@@ -40,11 +40,11 @@ import static de.robv.android.xposed.XposedHelpers.setObjectField;
 
 public class YouTubeBackgroundPlayback implements IXposedHookLoadPackage {
 
-	public static final String LOG_TAG = "YTBackgroundPlayback";
+	private static final String LOG_TAG = "YTBackgroundPlayback";
 
-	public static final String APP_PACKAGE = "com.google.android.youtube";
+	private static final String APP_PACKAGE = "com.google.android.youtube";
 
-	public static final String HOOKS_DOWNLOAD_URL = "https://raw.githubusercontent.com/pylerSM/YouTubeBackgroundPlayback/master/assets/hooks-3.json";
+	private static final String HOOKS_DOWNLOAD_URL = "https://raw.githubusercontent.com/pylerSM/YouTubeBackgroundPlayback/master/assets/hooks-3.json";
 
 	private static final ScheduledExecutorService WORKER = Executors.newSingleThreadScheduledExecutor();
 
@@ -59,7 +59,7 @@ public class YouTubeBackgroundPlayback implements IXposedHookLoadPackage {
 		new HooksDownloadTask(this).execute();
 	}
 
-	public void hook(JSONObject hooksFile) throws PackageManager.NameNotFoundException {
+	private void hook(JSONObject hooksFile) throws PackageManager.NameNotFoundException {
 		if (hooksFile == null) {
 			return;
 		}
@@ -91,7 +91,11 @@ public class YouTubeBackgroundPlayback implements IXposedHookLoadPackage {
 		JSONArray hooks = null;
 		for (int versionMultiplier : versionMultipliers) {
 			final String version = Integer.toString(versionCode / (versionMultiplier < 1 ? 1 : versionMultiplier), 10);
-			hooks = hooksFile.optJSONArray(version);
+			try {
+				      hooks = hooksFile.getJSONObject("x" + versionMultiplier).optJSONArray(version);
+			} catch (JSONException ignored) {
+				// no-op
+			}
 			if (hooks != null) {
 				break;
 			}
@@ -158,76 +162,97 @@ public class YouTubeBackgroundPlayback implements IXposedHookLoadPackage {
 				}
 
 				XC_MethodHook callback = null;
-				if (actionName.equals("return_boolean")) {
-					callback = returnConstant(action.optBoolean("value"));
-				} else if (actionName.equals("return_string")) {
-					callback = returnConstant(action.optString("value"));
-				} else if (actionName.equals("set_field_boolean_before_method")) {
-					final String fieldName = action.optString("field_name");
-					final boolean value = action.optBoolean("value");
-					if (fieldName.length() > 0) {
-						callback = new XC_MethodHook() {
-							@Override
-							protected void beforeHookedMethod(final MethodHookParam param) {
-								final String[] fieldParts = fieldName.split("\\.");
-								Object thisObject = param.thisObject;
-								for (int iPart = 0; iPart < fieldParts.length - 1; iPart++) {
-									thisObject = getObjectField(thisObject, fieldParts[iPart]);
-								}
-								setBooleanField(thisObject, fieldParts[fieldParts.length - 1], value);
-							}
-						};
+				switch (actionName) {
+					case "return_boolean": {
+						callback = returnConstant(action.optBoolean("value"));
+						break;
 					}
-				} else if (actionName.equals("set_field_string_before_method")) {
-					final String fieldName = action.optString("field_name");
-					final boolean value = action.optBoolean("value");
-					if (fieldName.length() > 0) {
-						callback = new XC_MethodHook() {
-							@Override
-							protected void beforeHookedMethod(final MethodHookParam param) {
-								final String[] fieldParts = fieldName.split("\\.");
-								Object thisObject = param.thisObject;
-								for (int iPart = 0; iPart < fieldParts.length - 1; iPart++) {
-									thisObject = getObjectField(thisObject, fieldParts[iPart]);
-								}
-								setObjectField(thisObject, fieldParts[fieldParts.length - 1], value);
-							}
-						};
+
+					case "return_string": {
+						callback = returnConstant(action.optString("value"));
+						break;
 					}
-				} else if (actionName.equals("set_field_boolean_after_method")) {
-					final String fieldName = action.optString("field_name");
-					final boolean value = action.optBoolean("value");
-					if (fieldName.length() > 0) {
-						callback = new XC_MethodHook() {
-							@Override
-							protected void afterHookedMethod(final MethodHookParam param) {
-								final String[] fieldParts = fieldName.split("\\.");
-								Object thisObject = param.thisObject;
-								for (int iPart = 0; iPart < fieldParts.length - 1; iPart++) {
-									thisObject = getObjectField(thisObject, fieldParts[iPart]);
+
+					case "set_field_boolean_before_method": {
+						final String fieldName = action.optString("field_name");
+						final boolean value = action.optBoolean("value");
+						if (fieldName.length() > 0) {
+							callback = new XC_MethodHook() {
+								@Override
+								protected void beforeHookedMethod(final MethodHookParam param) {
+									final String[] fieldParts = fieldName.split("\\.");
+									Object thisObject = param.thisObject;
+									for (int iPart = 0; iPart < fieldParts.length - 1; iPart++) {
+										thisObject = getObjectField(thisObject, fieldParts[iPart]);
+									}
+									setBooleanField(thisObject, fieldParts[fieldParts.length - 1], value);
 								}
-								setBooleanField(thisObject, fieldParts[fieldParts.length - 1], value);
-							}
-						};
+							};
+						}
+						break;
 					}
-				} else if (actionName.equals("set_field_string_after_method")) {
-					final String fieldName = action.optString("field_name");
-					final boolean value = action.optBoolean("value");
-					if (fieldName.length() > 0) {
-						callback = new XC_MethodHook() {
-							@Override
-							protected void afterHookedMethod(final MethodHookParam param) {
-								final String[] fieldParts = fieldName.split("\\.");
-								Object thisObject = param.thisObject;
-								for (int iPart = 0; iPart < fieldParts.length - 1; iPart++) {
-									thisObject = getObjectField(thisObject, fieldParts[iPart]);
+
+					case "set_field_string_before_method": {
+						final String fieldName = action.optString("field_name");
+						final boolean value = action.optBoolean("value");
+						if (fieldName.length() > 0) {
+							callback = new XC_MethodHook() {
+								@Override
+								protected void beforeHookedMethod(final MethodHookParam param) {
+									final String[] fieldParts = fieldName.split("\\.");
+									Object thisObject = param.thisObject;
+									for (int iPart = 0; iPart < fieldParts.length - 1; iPart++) {
+										thisObject = getObjectField(thisObject, fieldParts[iPart]);
+									}
+									setObjectField(thisObject, fieldParts[fieldParts.length - 1], value);
 								}
-								setObjectField(thisObject, fieldParts[fieldParts.length - 1], value);
-							}
-						};
+							};
+						}
+						break;
 					}
-				} else {
-					Log.w(LOG_TAG, "Ignoring an unrecognized hook action for YouTube in the list. [a:" + actionName + ";vc:" + versionCode + "]");
+
+					case "set_field_boolean_after_method": {
+						final String fieldName = action.optString("field_name");
+						final boolean value = action.optBoolean("value");
+						if (fieldName.length() > 0) {
+							callback = new XC_MethodHook() {
+								@Override
+								protected void afterHookedMethod(final MethodHookParam param) {
+									final String[] fieldParts = fieldName.split("\\.");
+									Object thisObject = param.thisObject;
+									for (int iPart = 0; iPart < fieldParts.length - 1; iPart++) {
+										thisObject = getObjectField(thisObject, fieldParts[iPart]);
+									}
+									setBooleanField(thisObject, fieldParts[fieldParts.length - 1], value);
+								}
+							};
+						}
+						break;
+					}
+
+					case "set_field_string_after_method": {
+						final String fieldName = action.optString("field_name");
+						final boolean value = action.optBoolean("value");
+						if (fieldName.length() > 0) {
+							callback = new XC_MethodHook() {
+								@Override
+								protected void afterHookedMethod(final MethodHookParam param) {
+									final String[] fieldParts = fieldName.split("\\.");
+									Object thisObject = param.thisObject;
+									for (int iPart = 0; iPart < fieldParts.length - 1; iPart++) {
+										thisObject = getObjectField(thisObject, fieldParts[iPart]);
+									}
+									setObjectField(thisObject, fieldParts[fieldParts.length - 1], value);
+								}
+							};
+						}
+						break;
+					}
+
+					default: {
+						Log.w(LOG_TAG, "Ignoring an unrecognized hook action for YouTube in the list. [a:" + actionName + ";vc:" + versionCode + "]");
+						break;
+					}
 				}
 				if (callback == null) {
 					continue;
@@ -246,11 +271,11 @@ public class YouTubeBackgroundPlayback implements IXposedHookLoadPackage {
 		Log.i(LOG_TAG, "Done applying the hooks. [vc:" + versionCode + "]");
 	}
 
-	public class HooksDownloadTask extends AsyncTask<Void, Void, JSONObject> {
+	public static class HooksDownloadTask extends AsyncTask<Void, Void, JSONObject> {
 
 		private final YouTubeBackgroundPlayback callback;
 
-		public HooksDownloadTask(YouTubeBackgroundPlayback callback) {
+		private HooksDownloadTask(YouTubeBackgroundPlayback callback) {
 			super();
 			this.callback = callback;
 		}
@@ -259,15 +284,21 @@ public class YouTubeBackgroundPlayback implements IXposedHookLoadPackage {
 		protected JSONObject doInBackground(Void... params) {
 			InputStream in = null;
 			try {
-				HttpsURLConnection conn = (HttpsURLConnection) new URL(HOOKS_DOWNLOAD_URL).openConnection();
-				conn.setChunkedStreamingMode(0);
+				URLConnection conn = new URL(HOOKS_DOWNLOAD_URL).openConnection();
 				conn.setConnectTimeout(40 * 1000 /* ms */);
 				conn.setDoInput(true);
 				conn.setDoOutput(false);
-				conn.setInstanceFollowRedirects(true);
 				conn.setReadTimeout(20 * 1000 /* ms */);
-				conn.setRequestMethod("GET");
 				conn.setUseCaches(true);
+
+				if (conn instanceof HttpURLConnection) {
+					HttpURLConnection hConn = (HttpURLConnection) conn;
+					hConn.setChunkedStreamingMode(0);
+					hConn.setInstanceFollowRedirects(true);
+					hConn.setRequestMethod("GET");
+				} else {
+					Log.w(LOG_TAG, "Our connection is not java.net.HttpURLConnection but instead " + conn.getClass().getName());
+				}
 
 				conn.connect();
 				in = conn.getInputStream();
@@ -299,9 +330,9 @@ public class YouTubeBackgroundPlayback implements IXposedHookLoadPackage {
 		@Override
 		protected void onPostExecute(JSONObject result) {
 			if (result == null) {
-				secondsUntilReload *= 2;
-				if (secondsUntilReload >= 90) {
-					secondsUntilReload = 90;
+				callback.secondsUntilReload *= 2;
+				if (callback.secondsUntilReload >= 90) {
+					callback.secondsUntilReload = 90;
 				}
 
 				WORKER.schedule(new Runnable() {
@@ -309,16 +340,14 @@ public class YouTubeBackgroundPlayback implements IXposedHookLoadPackage {
 					public void run() {
 						new HooksDownloadTask(callback).execute();
 					}
-				}, ((int) Math.floor(Math.random() * secondsUntilReload)) + 1, TimeUnit.SECONDS);
+				}, ((int) Math.floor(Math.random() * callback.secondsUntilReload)) + 1, TimeUnit.SECONDS);
 			} else {
-				secondsUntilReload = 5;
-				if (callback != null) {
-					try {
-						callback.hook(result);
-					} catch (PackageManager.NameNotFoundException e) {
-						// if this happens, something has gone very very (very!) wrong.
-						throw new RuntimeException("YouTube package reportedly not found even though it was loaded", e);
-					}
+				callback.secondsUntilReload = 5;
+				try {
+					callback.hook(result);
+				} catch (PackageManager.NameNotFoundException e) {
+					// if this happens, something has gone very very (very!) wrong.
+					throw new RuntimeException("YouTube package reportedly not found even though it was loaded", e);
 				}
 			}
 		}
