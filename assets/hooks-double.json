@@ -450,10 +450,10 @@
             { "class_name": "adwn", "method_name": "d", "parameter_types": [], "actions": [
                 { "name": "set_field_boolean_before_method", "field_name": "d.h", "value": true }
             ] },
-            { "class_name": "dem", "method_name": "f", "parameter_types": [], "actions": [
+            { "class_name": "dhd", "method_name": "f", "parameter_types": [], "actions": [
                 { "name": "return_string", "value": "on" }
             ] },
-            { "class_name": "afaz", "method_name": "d", "parameter_types": [ "ajfw" ], "actions": [
+            { "class_name": "afbe", "method_name": "d", "parameter_types": [ "aiys" ], "actions": [
                 { "name": "return_boolean", "value": true }
             ] }
         ],
@@ -461,10 +461,10 @@
             { "class_name": "adwn", "method_name": "d", "parameter_types": [], "actions": [
                 { "name": "set_field_boolean_before_method", "field_name": "d.h", "value": true }
             ] },
-            { "class_name": "dem", "method_name": "f", "parameter_types": [], "actions": [
+            { "class_name": "dhd", "method_name": "f", "parameter_types": [], "actions": [
                 { "name": "return_string", "value": "on" }
             ] },
-            { "class_name": "afaz", "method_name": "d", "parameter_types": [ "ajfw" ], "actions": [
+            { "class_name": "afbe", "method_name": "d", "parameter_types": [ "aiys" ], "actions": [
                 { "name": "return_boolean", "value": true }
             ] }
         ]
