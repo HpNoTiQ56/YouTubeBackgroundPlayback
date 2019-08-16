@@ -10,6 +10,6 @@ To build from source on your own device, feel free to clone this repository and 
 
 ## TODO tasks
 
-- [X] YouTube Music support - check other branches...
+- [X] YouTube Music support - finally in the same .apk
 
-This fork remains as backup - it's synced with original one
+## This fork remains as backup - it's the same as original one
