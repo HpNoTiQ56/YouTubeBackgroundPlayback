@@ -344,6 +344,20 @@
             { "class_name": "vnj", "method_name": "c", "parameter_types": [ "adnn" ], "actions": [
                 { "name": "return_boolean", "value": true }
             ] }
+        ],
+        "35351": [
+            { "class_name": "vog", "method_name": "c", "parameter_types": [ "adpe" ], "actions": [
+                { "name": "return_boolean", "value": true }
+            ] },
+            { "class_name": "djd", "method_name": "b", "parameter_types": [], "actions": [
+                { "name": "return_boolean", "value": true }
+            ] },
+            { "class_name": "djd", "method_name": "c", "parameter_types": [], "actions": [
+                { "name": "return_boolean", "value": true }
+            ] },
+            { "class_name": "djf", "method_name": "a", "parameter_types": [], "actions": [
+                { "name": "return_boolean", "value": true }
+            ] }
         ]
     },
     "x10000": {
