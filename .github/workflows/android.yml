@@ -25,4 +25,4 @@ jobs:
         # Artifact name
         name: YTBP-autogen
         # Directory containing files to upload
-        path: YTBP/autobuild
+        path: .YTBP/autobuild
