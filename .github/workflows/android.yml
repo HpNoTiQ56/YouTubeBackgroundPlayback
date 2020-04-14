@@ -19,10 +19,10 @@ jobs:
         java-version: 1.8
     - name: Build with Gradle
       run: ./gradlew build
-    - name: Upload artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v1.0.0
       with:
         # Artifact name
         name: YTBP-autogen
         # Directory containing files to upload
-        path: .YTBP/autobuild
+        path: app/build/outputs/apk/debug/app-debug.apk
