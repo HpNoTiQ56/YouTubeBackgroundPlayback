@@ -1,15 +1,17 @@
+![Android CI](https://github.com/th3an7/YouTubeBackgroundPlayback/workflows/Android%20CI/badge.svg)
 # YouTube Background Playback
 
-Xposed module: Enable background playback in YouTube
+Xposed module: Enable background playback in YouTube - Now with YouTube Music support
 
 ## How to install
+- Make sure your Xposed Framework and Installer are installed and working properly
+- Compile with Android Studio/Gradle 
+#### OR
+- Grab correct .apk from releases tab on this very repo
+  - You can also download .zip with unsigned, automatically built .apk from Actions tab (be aware, you can't install it on top of signed one)
+- Install as any other .apk
 
-[~~Simply grab the module from the Xposed Module Repository.~~](https://github.com/pylerSM/YouTubeBackgroundPlayback/issues/336)
+All apks in **Releases** tab are signed with original keys... nothing changed/removed from original repo
 
-To build from source on your own device, feel free to clone this repository and use Gradle. You can read more about how to build locally on [Android Developers](https://developer.android.com/tools/building/building-cmdline.html) if you are interested.
-
-## TODO tasks
-
-- [X] YouTube Music support - finally in the same .apk
-
-## This fork remains as backup - it's the same as original one
+## This fork remains as backup - it's exact same as original one and all credits should always go to PylerSM
+###### I am just keeping it alive
