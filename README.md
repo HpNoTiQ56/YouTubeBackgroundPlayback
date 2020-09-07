@@ -1,8 +1,8 @@
 #### Find Classes for YTBP faster
 
-# YTBP IDA Python script
+# YTBP IDA Scripts
 # How to use
-- Download `find_classes.py` script file
+- Download `find_classes.py` or `find_classes.idc` script file
 - Decompile YT .apk file using [apktool](https://ibotpeaches.github.io/Apktool/) (using `apktool d -s <apk file>` command)
 - Open `classes.dex` and `classes3.dex` files in IDA Pro
 - After initial auto-analysis, load downloaded script in IDA in `File > Script file...` (default `Alt+F7`)
