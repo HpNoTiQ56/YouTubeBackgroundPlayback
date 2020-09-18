@@ -15,3 +15,6 @@ All apks in **Releases** tab are signed with original keys... nothing changed/re
 
 ## This fork remains as backup - it's exact same as original one and all credits should always go to PylerSM
 ###### I am just keeping it alive
+
+
+#### For quick classes finding, check [IDA Scripts branch](https://github.com/th3an7/YouTubeBackgroundPlayback/tree/IDA-Script)
