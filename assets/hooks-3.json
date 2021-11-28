@@ -3473,6 +3473,17 @@
                 { "name": "return_boolean", "value": true }
             ] }
         ],
+        "152187": [
+            { "class_name": "agnw", "method_name": "e", "parameter_types": [], "actions": [
+                { "name": "set_field_boolean_before_method", "field_name": "l.m", "value": true }
+            ] },
+            { "class_name": "eat", "method_name": "a", "parameter_types": ["int"], "actions": [
+                { "name": "set_args_value_before_method", "value": "INT:1" }
+            ] },
+            { "class_name": "ahqx", "method_name": "l", "parameter_types": [ "arab" ], "actions": [
+                { "name": "return_boolean", "value": true }
+            ] }
+        ],
         "152226": [
             { "class_name": "agqp", "method_name": "e", "parameter_types": [], "actions": [
                 { "name": "set_field_boolean_before_method", "field_name": "l.m", "value": true }
