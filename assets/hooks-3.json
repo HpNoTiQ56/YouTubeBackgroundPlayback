@@ -3530,7 +3530,7 @@
         ],
         "152422": [
             { "class_name": "ahlx", "method_name": "e", "parameter_types": [], "actions": [
-                { "name": "set_field_boolean_before_method", "field_name": "l.m", "value": true }
+                { "name": "set_field_boolean_before_method", "field_name": "k.l", "value": true }
             ] },
             { "class_name": "feg", "method_name": "a", "parameter_types": ["int"], "actions": [
                 { "name": "set_args_value_before_method", "value": "INT:1" }
