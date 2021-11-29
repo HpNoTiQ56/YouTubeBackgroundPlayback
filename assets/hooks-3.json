@@ -3549,6 +3549,17 @@
             { "class_name": "ahmn", "method_name": "h", "parameter_types": [ "asns" ], "actions": [
                 { "name": "return_boolean", "value": true }
             ] }
+        ],
+        "152435": [
+            { "class_name": "aim", "method_name": "d", "parameter_types": [], "actions": [
+                { "name": "set_field_boolean_before_method", "field_name": "g.h", "value": true }
+            ] },
+            { "class_name": "ogm", "method_name": "N", "parameter_types": ["int"], "actions": [
+                { "name": "set_args_value_before_method", "value": "INT:1" }
+            ] },
+            { "class_name": "aale", "method_name": "h", "parameter_types": [ "akkk" ], "actions": [
+                { "name": "return_boolean", "value": true }
+            ] }
         ]
     }
 }
